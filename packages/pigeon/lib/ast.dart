@@ -158,6 +158,21 @@ class TypeDeclaration {
   /// Associated [Class], if any.
   final Class? associatedClass;
 
+  bool get isLowestLevelNestedCollection {
+    return (baseName == 'List' || baseName == 'Map') && typeArguments.every((TypeDeclaration e) => e.baseName != 'List' && e.baseName != 'Map');
+  }
+
+  /// Returns true if the declaration is a `Map` or a `List`.
+  bool get isCollection {
+    switch (baseName) {
+      case 'Map':
+      case 'List':
+        return true;
+      default:
+        return false;
+    }
+  }
+
   @override
   int get hashCode {
     // This has to be implemented because TypeDeclaration is used as a Key to a
