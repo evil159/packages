@@ -864,9 +864,58 @@ String _makeGenericTypeArguments(TypeDeclaration type) {
 /// Creates a `.cast<>` call for an type. Returns an empty string if the
 /// type has no type arguments.
 String _makeGenericCastCall(TypeDeclaration type) {
-  return type.typeArguments.isNotEmpty
-      ? '.cast<${_flattenTypeArguments(type.typeArguments)}>()'
-      : '';
+  if (type.typeArguments.isEmpty) {
+    return '';
+  }
+
+  if (type.isCollection) {
+    return _makeCollectionCastCall(type);
+  }
+
+  return '.cast<${_flattenTypeArguments(type.typeArguments)}>()';
+}
+
+String _makeCollectionCastCall(TypeDeclaration type) {
+  if (type.typeArguments.isEmpty) {
+    return '';
+  }
+
+  if (type.isLowestLevelNestedCollection) {
+    return '.cast<${_flattenTypeArguments(type.typeArguments)}>()';
+  }
+
+  switch (type.baseName) {
+    case 'List':
+      return '''
+.map((e) {
+  return ${_makeCollectionConversionCall(type.typeArguments[0], 'e')}${_makeCollectionCastCall(type.typeArguments[0])};
+}).toList()''';
+    case 'Map':
+      return '''
+.map((key, value) {
+  return MapEntry(
+    ${_makeCollectionConversionCall(type.typeArguments[0], 'key')}${_makeCollectionCastCall(type.typeArguments[0])},
+    ${_makeCollectionConversionCall(type.typeArguments[1], 'value')}${_makeCollectionCastCall(type.typeArguments[1])}
+  );
+})''';
+    default:
+      return '';
+  }
+}
+
+String _makeCollectionConversionCall(TypeDeclaration type, String variableName) {
+  if (type.typeArguments.isEmpty) {
+    return '$variableName as ${type.baseName}';
+  }
+
+  switch (type.baseName) {
+    case 'List':
+      return 'List<Object>.from($variableName as List<dynamic>)';
+    case 'Map':
+      return 'Map<Object?, Object?>.from($variableName as Map<dynamic, dynamic>)';
+    default:
+      return '$variableName as ${type.baseName}';
+  }
 }
 
 /// Returns an argument name that can be used in a context where it is possible to collide.
