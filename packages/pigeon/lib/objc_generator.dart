@@ -361,7 +361,7 @@ class ObjcHeaderGenerator extends StructuredGenerator<ObjcOptions> {
       final String enumReturnType = _enumName(
         returnTypeName.baseName,
         suffix: ' *_Nullable',
-        prefix: generatorOptions.prefix,
+        prefix: '',
         box: true,
       );
       if (func.isAsynchronous) {
@@ -799,7 +799,7 @@ static FlutterError *createConnectionError(NSString *channelName) {
 
         if (func.returnType.isEnum) {
           returnTypeString =
-              '${_enumName(returnType.baseName, suffix: ' *_Nullable', prefix: generatorOptions.prefix, box: true)} enumValue';
+              '${_enumName(returnType.baseName, suffix: ' *_Nullable', prefix: '', box: true)} enumValue';
         }
         if (func.parameters.isEmpty) {
           indent.writeScoped(
@@ -1212,7 +1212,7 @@ String _callbackForType(
   if (type.isVoid) {
     return 'void (^)(FlutterError *_Nullable)';
   } else if (type.isEnum) {
-    return 'void (^)(${_enumName(objcType.baseName, suffix: ' *_Nullable', prefix: options.prefix, box: true)}, FlutterError *_Nullable)';
+    return 'void (^)(${_enumName(objcType.baseName, suffix: ' *_Nullable', prefix: '', box: true)}, FlutterError *_Nullable)';
   } else {
     return 'void (^)(${objcType.beforeString}_Nullable, FlutterError *_Nullable)';
   }
